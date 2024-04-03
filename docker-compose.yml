@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  mobashi-surv:
+    #image: mobashi-surv
+    env_file:
+      - ./configs/django/prod/.env
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: production
+      args:
+        # Update 'VARIANT' to pick a Python version: 3, 3.10, 3.9, 3.8, 3.7, 3.6
+        # Append -bullseye or -buster to pin to an OS version.
+        # Use -bullseye variants on local on arm64/Apple Silicon.
+        VARIANT: "3.11-bullseye"
+        NODE_VERSION: "none"
+        VIRTUAL_ENV: "/opt/venv"
+    ports:
+      - ${HOST_HTTP_PORT:-4002}:${HOST_HTTP_PORT:-4002}
+    volumes:
+      - type: bind
+        source: ./configs/django/prod
+        target: /app/server/django_configs
+        bind:
+            create_host_path: false
+        read_only: true
+      - type: bind
+        source: ./secrets/django/prod
+        target: /app/server/django_secrets
+        bind:
+            create_host_path: false
+        read_only: true
+      - type: bind
+        source: /var/local/mnt/mobashi-surv
+        target: /app/mnt
+        bind:
+            create_host_path: false
+        read_only: false
+    command: gunicorn --bind 0.0.0.0:${HOST_HTTP_PORT:-4002} server.wsgi

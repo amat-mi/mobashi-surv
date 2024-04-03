@@ -1,0 +1,87 @@
+version: '3.9'
+services:
+  # Update this to the name of the service you want to work with in your docker-compose.yml file
+  mobashi-surv:
+    # Uncomment if you want to override the service's Dockerfile to one in the .devcontainer 
+    # folder. Note that the path of the Dockerfile and context is relative to the *primary* 
+    # docker-compose.yml file (the first in the devcontainer.json "dockerComposeFile"
+    # array). The sample below assumes your primary file is in the root of your project.
+    #
+    # build:
+    #   context: .
+    #   dockerfile: .devcontainer/Dockerfile
+    env_file:
+      - ./configs/django/localdev/.env
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: development
+    volumes:
+      # Update this to wherever you want VS Code to mount the folder of your project
+      - ..:/workspaces:cached
+      - type: bind
+        source: ./configs/django/localdev
+        target: /workspaces/mobashi-surv/mobashi-surv/server/django_configs
+        bind:
+          create_host_path: false
+        read_only: true
+      - type: bind
+        source: ./secrets/django/localdev
+        target: /workspaces/mobashi-surv/mobashi-surv/server/django_secrets
+        bind:
+          create_host_path: false
+        read_only: true
+      - type: bind
+        source: ./secrets/postgres/localdev
+        target: /postgres_secrets
+        bind:
+          create_host_path: false
+        read_only: true
+      - type: bind
+        source: ./mnt
+        target: /app/mnt
+        bind:
+          create_host_path: false
+        read_only: false
+    # Uncomment the next four lines if you will use a ptrace-based debugger like C++, Go, and Rust.
+    # cap_add:
+    #   - SYS_PTRACE
+    # security_opt:
+    #   - seccomp:unconfined
+
+    # Overrides default command so things don't shut down after the process ends.
+    # It seems to be ignored, though!!!
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    depends_on:
+      - db
+
+  db:
+    env_file:
+      - ./configs/postgres/localdev/.env
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - type: bind
+        source: ./secrets/postgres/localdev
+        target: /postgres_secrets
+        bind:
+          create_host_path: false
+        read_only: true
+      - type: bind
+        source: ./configs/postgres/localdev/998_init_django.sql
+        target: /docker-entrypoint-initdb.d/998_init_django.sql
+        bind:
+          create_host_path: false
+        read_only: true
+      - type: bind
+        source: ./secrets/postgres/localdev/999_init_djangouser.sql
+        target: /docker-entrypoint-initdb.d/999_init_djangouser.sql
+        bind:
+          create_host_path: false
+        read_only: true
+    ports:
+      - ${HOST_DB_PORT:-5436}:5432
+
+volumes:
+  pgdata:

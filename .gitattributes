@@ -1,0 +1,8 @@
+# Always use LF (Linux) line endings for all text files except Windows batches and commands
+# This IS needed because this repository may be cloned on Windows but then the devcontainer will run on Linux.
+# Otherwise all file will be seen as modified by git.
+# See: https://code.visualstudio.com/docs/devcontainers/tips-and-tricks#_resolving-git-line-ending-issues-in-containers-resulting-in-many-modified-files
+
+* text=auto eol=lf
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf
