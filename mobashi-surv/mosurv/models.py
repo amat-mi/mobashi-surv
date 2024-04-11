@@ -17,8 +17,8 @@ class School(RulesModel):
                             blank=True, editable=True, unique=True)
     name = models.CharField(_('School'), max_length=100, unique=True,
                             help_text=_('Distinctive name of the school'))
-    code = models.CharField(_('Code'), max_length=20, null=True, blank=True, unique=True,
-                            help_text=_('Unique code of the school'))
+    code = models.CharField(_('Code'), max_length=20, null=True, blank=True,
+                            help_text=_('Code of the school'))
     address = models.CharField(_('Address'), max_length=300, null=True, blank=True,
                                help_text=_('Complete address of the school'))
     lat = models.FloatField(null=True, blank=True)
