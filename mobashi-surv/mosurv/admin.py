@@ -75,11 +75,12 @@ admin.site.register(Campaign, CampaignAdmin)
 
 class SurveyAdmin(BaseAdmin):
     list_display = ("__str__", 'status', 'stamp')
-    search_fields = ("name", "uuid",
-                     "campaign__name", "campaign__uuid",
-                     "schools__name", "schools__uuid",
+    search_fields = ("campaign__name", "campaign__uuid",
+                     "school__name", "school__uuid",
+                     "user__username", "user__email", 
+                     "user__first_name", "user__last_name",
                      )
-    list_filter = ('status', )
+    list_filter = ('status', 'kind', )
     readonly_fields = ('stamp', )
 
 
